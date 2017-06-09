@@ -1,3 +1,4 @@
+import { Accounts } from 'meteor/accounts-base';
 import { hasConfig, getKeycloakService } from './common.js'
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
@@ -6,6 +7,25 @@ const notEmpty = (value, fieldName) => {
     if (!value || (value === "string" && 0 === value.length)) {
         throw new Error(`${fieldName} must be a value`);
     }
+};
+
+const createOrUpdateUser = (userKC, userCallback) => {
+    let user = {
+        id: userKC.id,
+        username: userKC.username,
+        firstName: userKC.firstName,
+        email: userKC.email,
+        enabled: userKC.enabled
+    };
+
+    TecSinapseKeycloak.getRoles(getKeycloakService(), user.id)
+        .then(roles => {
+            user.roles = roles;
+            Accounts.callLoginMethod({
+                methodArguments: [user],
+                userCallback
+            });
+        });
 };
 
 Accounts.loginWithKeycloak = (email, password, userCallback) => {
@@ -21,23 +41,27 @@ Accounts.loginWithKeycloak = (email, password, userCallback) => {
     notEmpty(email, 'Email');
     notEmpty(password, 'Password');
 
-    //TecSinapseKeycloak.login(email, password, getKeycloakService())
-    //.then(token => console.log(token));
+    if (Accounts.isLogged()) {
+        return;
+    }
 
-    TecSinapseKeycloak.getUser(email, getKeycloakService())
-        .then(user => {
-            console.log(user);
-
-            if (!user) {
+    TecSinapseKeycloak.login(email, password, getKeycloakService())
+        .then(accessToken => TecSinapseKeycloak.getUser(email, getKeycloakService()))
+        .then(userKC => {
+            if (!userKC) {
                 error = new Error(`User with email ${email} not found`);
                 userCallback(error);
                 throw error;
             }
-
-            //Accounts.callLoginMethod({
-            //    methodArguments: [{email, password}],
-            //    userCallback
-            //});
+            createOrUpdateUser(userKC, userCallback);
         });
 };
 
+Accounts.logoutKeycloak = (callback) => {
+    TecSinapseKeycloak.logout(getKeycloakService(), () => {
+        Meteor.logout();
+        if (callback) {
+            callback();
+        }
+    });
+};
