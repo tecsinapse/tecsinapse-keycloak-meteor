@@ -4,7 +4,7 @@ import { ServiceConfiguration } from 'meteor/service-configuration';
 import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 
 Accounts.isLogged = () => {
-    return TecSinapseKeycloak.isLogged() && Meteor.user();
+    return TecSinapseKeycloak.isLogged() && Accounts.user();
 };
 
 export const SERVICE_NAME = 'keycloak';
