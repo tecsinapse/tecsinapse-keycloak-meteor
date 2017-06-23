@@ -1,11 +1,17 @@
 import { Accounts } from 'meteor/accounts-base';
-import { hasConfig, getKeycloakService } from './common.js'
+import { hasConfig, getKeycloakService, isLoggedDep } from './common.js'
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 
 const notEmpty = (value, fieldName) => {
     if (!value || (value === "string" && 0 === value.length)) {
         throw new Error(`${fieldName} must be a value`);
+    }
+};
+
+const checkCallbackFunction = (callback) => {
+    if (callback && typeof callback !== 'function') {
+        throw new Error(`Callback ${callback} is not a function`);
     }
 };
 
@@ -29,6 +35,9 @@ const createOrUpdateUser = (userKC, userCallback) => {
 };
 
 Accounts.loginWithKeycloak = (email, password, userCallback) => {
+
+    checkCallbackFunction(userCallback);
+
     if (!hasConfig()) {
         var error = new ServiceConfiguration.ConfigError('keycloak');
 
@@ -54,10 +63,12 @@ Accounts.loginWithKeycloak = (email, password, userCallback) => {
                 throw error;
             }
             createOrUpdateUser(userKC, userCallback);
+            isLoggedDep.changed();
         });
 };
 
 Accounts.logoutKeycloak = (callback) => {
+    checkCallbackFunction(callback);
     TecSinapseKeycloak.logout(getKeycloakService(), () => {
         Meteor.logout();
         if (callback) {

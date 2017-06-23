@@ -1,9 +1,13 @@
 import { Meteor } from 'meteor/meteor'
+import { Tracker } from 'meteor/tracker'
 import { Accounts } from 'meteor/accounts-base';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 
+export const isLoggedDep = new Tracker.Dependency;
+
 Accounts.isLogged = () => {
+    isLoggedDep.depend();
     return TecSinapseKeycloak.isLogged() && Accounts.user();
 };
 
