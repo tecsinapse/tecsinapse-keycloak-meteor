@@ -4,7 +4,7 @@ Npm.depends({
 
 Package.describe({
   name: 'tecsinapse:keycloak-meteor',
-  version: '0.0.1',
+  version: '0.0.2',
   summary: 'Keycloak login integrated with Accounts',
   git: 'https://github.com/tecsinapse/tecsinapse-keycloak-meteor.git',
   documentation: 'README.md'
