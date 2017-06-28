@@ -71,6 +71,7 @@ Accounts.logoutKeycloak = (callback) => {
     checkCallbackFunction(callback);
     TecSinapseKeycloak.logout(getKeycloakService(), () => {
         Meteor.logout();
+        isLoggedDep.changed();
         if (callback) {
             callback();
         }
