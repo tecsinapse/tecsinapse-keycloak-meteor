@@ -1,5 +1,5 @@
 Npm.depends({
-  'tecsinapse-keycloak-js': '1.0.10'
+  'tecsinapse-keycloak-js': '1.0.11'
 });
 
 Package.describe({
