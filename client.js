@@ -1,17 +1,11 @@
 import { Accounts } from 'meteor/accounts-base';
-import { hasConfig, getKeycloakService, isLoggedDep } from './common.js'
+import { hasConfig, getKeycloakService, isLoggedDep, checkCallbackFunction } from './common.js'
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 
 const notEmpty = (value, fieldName) => {
     if (!value || (value === "string" && 0 === value.length)) {
         throw new Error(`${fieldName} must be a value`);
-    }
-};
-
-const checkCallbackFunction = (callback) => {
-    if (callback && typeof callback !== 'function') {
-        throw new Error(`Callback ${callback} is not a function`);
     }
 };
 

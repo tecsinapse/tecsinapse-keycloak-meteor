@@ -14,3 +14,8 @@ Accounts.isLogged = () => {
 export const SERVICE_NAME = 'keycloak';
 export const hasConfig = () => ServiceConfiguration.configurations.findOne({service: SERVICE_NAME});
 export const getKeycloakService = () => ServiceConfiguration.configurations.findOne({service: SERVICE_NAME});
+export const checkCallbackFunction = (callback) => {
+    if (callback && typeof callback !== 'function') {
+        throw new Error(`Callback ${callback} is not a function`);
+    }
+};
