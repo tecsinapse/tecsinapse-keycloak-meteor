@@ -28,21 +28,33 @@ const createOrUpdateUser = (userKC, userCallback) => {
         });
 };
 
-Accounts.loginWithKeycloak = (email, password, userCallback) => {
-
-    checkCallbackFunction(userCallback);
-
+function checkKeycloakConfigService(userCallback) {
     if (!hasConfig()) {
         var error = new ServiceConfiguration.ConfigError('keycloak');
-
+    
         if (userCallback) {
             userCallback(error);
         }
         throw new Error(error);
     }
+}
+function checkEmailAndPassword(email, password, userCallback) {
+    try {
+        notEmpty(email, 'Email');
+        notEmpty(password, 'Password');
+    } catch(error) {
+        if (userCallback) {
+            userCallback(error);
+        }
+        throw error;
+    }
+}
 
-    notEmpty(email, 'Email');
-    notEmpty(password, 'Password');
+Accounts.loginWithKeycloak = (email, password, userCallback) => {
+
+    checkCallbackFunction(userCallback);
+    checkKeycloakConfigService(userCallback);
+    checkEmailAndPassword(email, password, userCallback);
 
     if (Accounts.isLogged()) {
         return;
@@ -53,11 +65,19 @@ Accounts.loginWithKeycloak = (email, password, userCallback) => {
         .then(userKC => {
             if (!userKC) {
                 error = new Error(`User with email ${email} not found`);
-                userCallback(error);
+                if (userCallback) {
+                    userCallback(error);
+                }
                 throw error;
             }
             createOrUpdateUser(userKC, userCallback);
             isLoggedDep.changed();
+        })
+        .catch(error => {
+            if (userCallback) {
+                userCallback(error);
+            }
+            throw error;
         });
 };
 
