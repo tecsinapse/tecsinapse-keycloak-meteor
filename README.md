@@ -12,15 +12,13 @@ This package use [`service-configuration`](https://atmospherejs.com/meteor/servi
 
 ```
 {
-  "public": {
-    "keycloak": {
+  "keycloak": {
       "realm": "yourRealm",
       "clientId": "yourClient",
       "urlServer": "https://auth.yourKeycloak.com",
       "adminUsername": "admin@yourUser.com",
       "adminPassword": "yourAdminPass"
     }
-  }
 }
 ```
 
@@ -28,7 +26,7 @@ and write this code in your server:
 
  ```
  import {Accounts} from 'meteor/accounts-base';
- Accounts.keycloakConfig(Meteor.settings.public.keycloak);
+ Accounts.keycloakConfig(Meteor.settings.keycloak);
  ```
 
  ## Logging up with Accounts
