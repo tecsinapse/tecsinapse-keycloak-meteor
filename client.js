@@ -9,25 +9,6 @@ const notEmpty = (value, fieldName) => {
     }
 };
 
-const createOrUpdateUser = (userKC, userCallback) => {
-    let user = {
-        id: userKC.id,
-        username: userKC.username,
-        firstName: userKC.firstName,
-        email: userKC.email,
-        enabled: userKC.enabled
-    };
-
-    TecSinapseKeycloak.getRoles(getKeycloakService(), user.id)
-        .then(roles => {
-            user.roles = roles;
-            Accounts.callLoginMethod({
-                methodArguments: [user],
-                userCallback
-            });
-        });
-};
-
 function checkKeycloakConfigService(userCallback) {
     if (!hasConfig()) {
         var error = new ServiceConfiguration.ConfigError('keycloak');
@@ -60,25 +41,11 @@ Accounts.loginWithKeycloak = (email, password, userCallback) => {
         return;
     }
 
-    TecSinapseKeycloak.login(email, password, getKeycloakService())
-        .then(accessToken => TecSinapseKeycloak.getUser(email, getKeycloakService()))
-        .then(userKC => {
-            if (!userKC) {
-                error = new Error(`User with email ${email} not found`);
-                if (userCallback) {
-                    userCallback(error);
-                }
-                throw error;
-            }
-            createOrUpdateUser(userKC, userCallback);
-            isLoggedDep.changed();
-        })
-        .catch(error => {
-            if (userCallback) {
-                userCallback(error);
-            }
-            throw error;
-        });
+    TecSinapseKeycloak.config(getKeycloakService());
+
+    TecSinapseKeycloak.login(email, password)
+        .then(accessToken => Meteor.call('createOrUpdateUser', email, userCallback));
+        
 };
 
 Accounts.logoutKeycloak = (callback) => {

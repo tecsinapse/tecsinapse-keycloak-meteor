@@ -6,9 +6,11 @@ import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 
 export const isLoggedDep = new Tracker.Dependency;
 
-Accounts.isLogged = () => {
+Accounts.isLogged = async () => {
     isLoggedDep.depend();
-    return TecSinapseKeycloak.isLogged() && Accounts.user();
+    const isLogged = false;
+    await TecSinapseKeycloak.isLogged().then(logged => isLogged = logged);
+    return isLogged && Accounts.user();
 };
 
 export const SERVICE_NAME = 'keycloak';
