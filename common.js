@@ -8,8 +8,10 @@ export const isLoggedDep = new Tracker.Dependency;
 
 Accounts.isLogged = async () => {
     isLoggedDep.depend();
-    const isLogged = false;
-    await TecSinapseKeycloak.isLogged().then(logged => isLogged = logged);
+    if(Meteor.server){
+        return !!Accounts.user();
+    }
+    const isLogged = await TecSinapseKeycloak.isLogged();
     return isLogged && Accounts.user();
 };
 

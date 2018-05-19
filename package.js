@@ -1,11 +1,11 @@
 Npm.depends({
-  'tecsinapse-keycloak-js': '2.0.1',
+  'tecsinapse-keycloak-js': '2.0.6',
   'node-fetch': '2.1.2'
 });
 
 Package.describe({
   name: 'tecsinapse:keycloak-meteor',
-  version: '0.0.11',
+  version: '0.0.12',
   summary: 'Keycloak login integrated with Accounts',
   git: 'https://github.com/tecsinapse/tecsinapse-keycloak-meteor.git',
   documentation: 'README.md'

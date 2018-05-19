@@ -31,30 +31,46 @@ function checkEmailAndPassword(email, password, userCallback) {
     }
 }
 
-Accounts.loginWithKeycloak = (email, password, userCallback) => {
+Accounts.loginWithKeycloak = async function(email, password, userCallback) {
 
     checkCallbackFunction(userCallback);
     checkKeycloakConfigService(userCallback);
     checkEmailAndPassword(email, password, userCallback);
 
-    if (Accounts.isLogged()) {
+    if (await Accounts.isLogged()) {
         return;
     }
-
     TecSinapseKeycloak.config(getKeycloakService());
 
-    TecSinapseKeycloak.login(email, password)
-        .then(accessToken => Meteor.call('createOrUpdateUser', email, userCallback));
-        
+    try {
+        await TecSinapseKeycloak.login(email, password);
+    }catch(e){
+        if(userCallback) {
+            userCallback(e)
+        }
+        return;
+    }
+    const user = Meteor.call("getUserInfo", email, function(err, user){
+        if(err && userCallback) {
+            userCallback(err);
+        }
+        console.log(user);
+        Accounts.callLoginMethod({
+            methodArguments: [user],
+            userCallback
+        });
+    });
+
+
 };
 
 Accounts.logoutKeycloak = (callback) => {
     checkCallbackFunction(callback);
-    TecSinapseKeycloak.logout(getKeycloakService(), () => {
-        Meteor.logout();
-        isLoggedDep.changed();
-        if (callback) {
-            callback();
-        }
+    TecSinapseKeycloak.getToken().then((token) => {
+        Meteor.call("logoutKeycloak", token.session_state, function(err){
+            Meteor.logout();
+            isLoggedDep.changed();
+            TecSinapseKeycloak.removeToken(callback);
+        });
     });
 };
