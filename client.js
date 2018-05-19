@@ -54,7 +54,6 @@ Accounts.loginWithKeycloak = async function(email, password, userCallback) {
         if(err && userCallback) {
             userCallback(err);
         }
-        console.log(user);
         Accounts.callLoginMethod({
             methodArguments: [user],
             userCallback
