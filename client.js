@@ -45,10 +45,12 @@ Accounts.loginWithKeycloak = async function(email, password, userCallback) {
     try {
         await TecSinapseKeycloak.login(email, password);
     }catch(e){
-        if(userCallback) {
-            userCallback(e)
+        if (e !== 'You are already logged in') {
+            if(userCallback) {
+                userCallback(e)
+            }
+            return;
         }
-        return;
     }
     const user = Meteor.call("getUserInfo", email, function(err, user){
         if(err && userCallback) {
@@ -59,17 +61,21 @@ Accounts.loginWithKeycloak = async function(email, password, userCallback) {
             userCallback
         });
     });
-
-
 };
 
 Accounts.logoutKeycloak = (callback) => {
     checkCallbackFunction(callback);
+    TecSinapseKeycloak.config(getKeycloakService());
     TecSinapseKeycloak.getToken().then((token) => {
         Meteor.call("logoutKeycloak", token.session_state, function(err){
             Meteor.logout();
             isLoggedDep.changed();
             TecSinapseKeycloak.removeToken(callback);
         });
+    })
+    .catch(error => {
+        if (callback) {
+            callback(error);
+        }
     });
 };

@@ -11,8 +11,9 @@ Accounts.isLogged = async () => {
     if(Meteor.server){
         return !!Accounts.user();
     }
+    TecSinapseKeycloak.config(getKeycloakService());
     const isLogged = await TecSinapseKeycloak.isLogged();
-    return isLogged && Accounts.user();
+    return isLogged && !!Accounts.user();
 };
 
 export const SERVICE_NAME = 'keycloak';

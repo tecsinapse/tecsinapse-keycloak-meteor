@@ -6,6 +6,15 @@ import TecSinapseKeycloak from 'tecsinapse-keycloak-js';
 import fetch from "node-fetch";
 import {getKeycloakService} from "./common";
 
+const getKeycloakConfig = () => {
+    return {
+        ...getKeycloakService(),
+        fetcher: fetch,
+        adminUsername: Meteor.settings['keycloak']['adminUsername'],
+        adminPassword: Meteor.settings['keycloak']['adminPassword']
+    }
+}
+
 Accounts.keycloakConfig = (config) => {
     let jsonConfig = config;
 
@@ -24,15 +33,17 @@ Accounts.keycloakConfig = (config) => {
 };
 
 
-Accounts.registerLoginHandler(SERVICE_NAME, function(user){
-
+Accounts.registerLoginHandler(SERVICE_NAME, function(user) {
     const r = Accounts.updateOrCreateUserFromExternalService(SERVICE_NAME, user);
     isLoggedDep.changed();
     return r;
 });
 
 Meteor.methods({
-    async getUserInfo(email){
+    async getUserInfo(email) {
+        
+        TecSinapseKeycloak.config(getKeycloakConfig());
+
         const userKC = await TecSinapseKeycloak.getUser(email);
         const roles = await TecSinapseKeycloak.getRoles(userKC.id);
 
@@ -46,7 +57,9 @@ Meteor.methods({
         user.roles = roles;
         return user;
     },
-    async logoutKeycloak(token){
+    async logoutKeycloak(token) {
+        const keycloakConfig = getKeycloakService();
+        TecSinapseKeycloak.config(getKeycloakConfig());
         await TecSinapseKeycloak.logoutWithoutRemoveToken(token);
     }
 });
