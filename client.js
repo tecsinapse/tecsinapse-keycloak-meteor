@@ -74,6 +74,9 @@ Accounts.logoutKeycloak = (callback) => {
         });
     })
     .catch(error => {
+        Meteor.logout();
+        isLoggedDep.changed();
+        
         if (callback) {
             callback(error);
         }
